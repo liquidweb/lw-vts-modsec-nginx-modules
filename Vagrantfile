@@ -14,5 +14,8 @@ export DEBIAN_FRONTEND=noninteractive
 cd /vagrant
 sh build.sh
 
+# todo: INCREASE YOUR VAGRANT MEMORY!!
+# todo: INCREASE VAGRANT PROCESSORS!!
+
   SHELL
 end

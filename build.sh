@@ -1,30 +1,31 @@
+echo "***************************** Install Packages ***************************"
+sudo sed -ri 's/archive.ubuntu.com/mirrors.liquidweb.com/' /etc/apt/sources.list
+sudo sed -ri 's/security.ubuntu.com/mirrors.liquidweb.com/' /etc/apt/sources.list
 sudo -E apt-get update
 sudo -E apt-get -y upgrade
 sudo -E apt-get -y install devscripts build-essential
-sudo -E apt-get -y install debhelper po-debconf libexpat-dev libgd-dev libgeoip-dev libhiredis-dev libluajit-5.1-dev libmhash-dev libpam0g-dev libpcre3-dev libperl-dev libssl-dev libxslt1-dev quilt zlib1g-dev
+sudo -E apt-get -y install debhelper po-debconf libexpat-dev libgd-dev libgeoip-dev libhiredis-dev libmhash-dev libpam0g-dev libpcre3-dev libperl-dev libssl-dev libxslt1-dev quilt zlib1g-dev
 sudo -E apt-get -y install libcurl4-openssl-dev apache2-dev
+sudo apt-get -y install libyajl-dev libcurl4-gnutls-dev liblua5.3-deaptav libmaxminddb-dev libfuzzy-dev
 
+echo "************************* Rebuild /vagrant/build *************************"
 rm -rf /vagrant/build
 mkdir -p /vagrant/build
 cd /vagrant/build
 
-
-mkdir modsecurity
-wget -o /dev/null https://github.com/SpiderLabs/ModSecurity/archive/v2.9.3.tar.gz -O - | tar -xzvf - --strip-components 1 -C modsecurity
-cd modsecurity
-./autogen.sh
-./configure
-make
-sudo -E make install
+echo "************************* Build ModSecurity ******************************"
+dget -u --build http://archive.ubuntu.com/ubuntu/pool/universe/m/modsecurity/modsecurity_3.0.3-1.dsc
+cd modsecurity-3.0.3/
+debuild -us -uc -b
+sudo debi
+sudo apt-get -y install libluajit-5.1-dev
 cd ..
 
-
+echo "************************* Install nginx **********************************"
 apt-get source nginx
 cd nginx*/debian
 
-dch -n ""
-
-# BEGIN VTS module block
+echo "************************* Package Up VTS Module **************************"
 mkdir modules/http-vhost-traffic-status
 wget -o /dev/null https://github.com/vozlt/nginx-module-vts/archive/v0.1.18.tar.gz -O - | tar -xzvf - --strip-components 1 -C modules/http-vhost-traffic-status
 
@@ -40,8 +41,8 @@ $module =~ s/^libnginx-mod-//;
 $modulepath = $module;
 $modulepath =~ s/-/_/g;
 
-print "mod debian/build-extras/objs/ngx_${modulepath}_module.so\\n";
-print "mod debian/libnginx-mod.conf/mod-${module}.conf\\n";
+print "mod debian/build-extras/objs/ngx_${modulepath}_module.so\n";
+print "mod debian/libnginx-mod.conf/mod-${module}.conf\n";
 EOF
 
 chmod 755 libnginx-mod-http-vhost-traffic-status.nginx
@@ -74,7 +75,7 @@ sed -ri 's/(.+)http-auth-pam(.+)/\1http-auth-pam\2\n\1http-vhost-traffic-status\
 dch -a "add vts module"
 # END VTS module block
 
-# BEGIN Mod Sec module block
+echo "************************* Package Up ModSec Module ***********************"
 mkdir modules/http-modsecurity
 wget -o /dev/null https://github.com/SpiderLabs/ModSecurity-nginx/archive/v1.0.0.tar.gz -O - | tar -xzvf - --strip-components 1 -C modules/http-modsecurity
 
@@ -90,8 +91,8 @@ $module =~ s/^libnginx-mod-//;
 $modulepath = $module;
 $modulepath =~ s/-/_/g;
 
-print "mod debian/build-extras/objs/ngx_${modulepath}_module.so\\n";
-print "mod debian/libnginx-mod.conf/mod-${module}.conf\\n";
+print "mod debian/build-extras/objs/ngx_${modulepath}_module.so\n";
+print "mod debian/libnginx-mod.conf/mod-${module}.conf\n";
 EOF
 
 chmod 755 libnginx-mod-http-modsecurity.nginx
@@ -115,7 +116,7 @@ Version: 1.0.0
 EOF
 
 cat >> libnginx-mod.conf/mod-http-modsecurity.conf <<"EOF"
-load_module modules/ngx_http-modsecurity_module.so;
+load_module modules/ngx_http_modsecurity_module.so;
 EOF
 
 sed -ri 's/(.+)http-auth-pam(.+)/\1http-auth-pam\2\n\1http-modsecurity\2/' rules
@@ -123,9 +124,11 @@ sed -ri 's/(.+)http-auth-pam(.+)/\1http-auth-pam\2\n\1http-modsecurity\2/' rules
 dch -a "add Mod Sec module"
 # END Mod Sec module block
 
+echo "************************* Build Packages *********************************"
 dch -r ""
 
 cd ..
 debuild -us -uc -b
 
+echo "************************* Build Shutdown *********************************"
 shutdown -h now
