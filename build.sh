@@ -6,7 +6,7 @@ sudo -E apt-get -y upgrade
 sudo -E apt-get -y install devscripts build-essential
 sudo -E apt-get -y install debhelper po-debconf libexpat-dev libgd-dev libgeoip-dev libhiredis-dev libmhash-dev libpam0g-dev libpcre3-dev libperl-dev libssl-dev libxslt1-dev quilt zlib1g-dev
 sudo -E apt-get -y install libcurl4-openssl-dev apache2-dev
-sudo apt-get -y install libyajl-dev libcurl4-gnutls-dev liblua5.3-deaptav libmaxminddb-dev libfuzzy-dev
+sudo -E apt-get -y install libyajl-dev libcurl4-gnutls-dev liblua5.3-dev libmaxminddb-dev libfuzzy-dev
 
 echo "************************* Rebuild /vagrant/build *************************"
 rm -rf /vagrant/build
@@ -129,6 +129,3 @@ dch -r ""
 
 cd ..
 debuild -us -uc -b
-
-echo "************************* Build Shutdown *********************************"
-shutdown -h now
