@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "***************************** Install Packages ***************************"
 sudo sed -ri 's/archive.ubuntu.com/mirrors.liquidweb.com/' /etc/apt/sources.list
 sudo sed -ri 's/security.ubuntu.com/mirrors.liquidweb.com/' /etc/apt/sources.list
@@ -129,3 +131,28 @@ dch -r ""
 
 cd ..
 debuild -us -uc -b
+
+echo "************************* Copy Important Debs ****************************"
+cd /vagrant
+rm -rf /vagrant/build_debs
+mkdir -p /vagrant/build_debs
+
+packages=(
+    libnginx-mod-http-geoip_1.14.0-0ubuntu*_amd64.deb
+    libnginx-mod-http-image-filter_1.14.0-0ubuntu*_amd64.deb
+    libnginx-mod-http-xslt-filter_1.14.0-0ubuntu*_amd64.deb
+    libnginx-mod-mail_1.14.0-0ubuntu*_amd64.deb
+    libnginx-mod-stream_1.14.0-0ubuntu*_amd64.deb
+    nginx_1.14.0-0ubuntu*_all.deb
+    nginx-common_1.14.0-0ubuntu*_all.deb
+    nginx-core_1.14.0-0ubuntu*_amd64.deb
+    libnginx-mod-http-modsecurity_1.14.0-0ubuntu*_amd64.deb
+    libnginx-mod-http-vhost-traffic-status_1.14.0-0ubuntu*_amd64.deb
+    libmodsecurity3_3.0.3-1_amd64.deb
+)
+
+for package in "${packages[@]}"
+do
+    echo "copying $package into /vagrant/build_debs"
+    cp build/$package build_debs
+done
