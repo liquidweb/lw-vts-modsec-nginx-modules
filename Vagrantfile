@@ -22,7 +22,6 @@ export DEBFULLNAME="Scott Coil"
 export DEBIAN_FRONTEND=noninteractive
 
 cd /vagrant
-chmod 755 build.sh
 ./build.sh
 
   SHELL
