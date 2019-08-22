@@ -1,0 +1,4 @@
+.vagrant
+build
+build_debs
+*.log
