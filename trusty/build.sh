@@ -27,6 +27,24 @@ cd nginx-1.12.1/debian
 mkdir -p patches
 quilt import /vagrant/files/http2.patch
 
+dch --nmu "OpenSSL Bump for http/2"
+dch --nmu "Patched http2"
+
 echo "************************* Build Packages *********************************"
 cd ..
 debuild -us -uc -b
+
+echo "************************* Copy Important Debs ****************************"
+cd /vagrant
+rm -rf /vagrant/build_debs
+mkdir -p /vagrant/build_debs
+
+packages=(
+    nginx_1.12.1-1~0.2_amd64.deb
+)
+
+for package in "${packages[@]}"
+do
+    echo "copying $package into /vagrant/build_debs"
+    cp build/$package build_debs
+done
