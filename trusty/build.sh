@@ -40,7 +40,7 @@ rm -rf /vagrant/build_debs
 mkdir -p /vagrant/build_debs
 
 packages=(
-    nginx_1.12.1-1~0.2_amd64.deb
+    nginx_1.12.1-1~0.*_amd64.deb
 )
 
 for package in "${packages[@]}"
